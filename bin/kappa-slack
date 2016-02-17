@@ -1,10 +1,8 @@
 #!/usr/bin/env ruby
+require 'rubygems'
+require 'bundler/setup'
 
-ENV['ENV'] ||= 'development'
-require 'bundler'
-Bundler.setup(:default, ENV['ENV'])
-
-APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/..")
+APP_ROOT = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 LIB_PATH = File.join(APP_ROOT, 'lib')
 $LOAD_PATH.unshift(LIB_PATH)
 

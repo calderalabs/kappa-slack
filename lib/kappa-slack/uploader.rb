@@ -31,7 +31,7 @@ module KappaSlack
 
         visit('/admin/emoji') do |emoji_page|
           uploaded_page = emoji_page
-          tmp_dir_path = "#{APP_ROOT}/tmp"
+          tmp_dir_path = File.join(APP_ROOT, 'tmp')
           FileUtils.mkdir_p(tmp_dir_path)
 
           emotes.each do |emote|
@@ -39,9 +39,9 @@ module KappaSlack
             next if existing_emote.present?
 
             KappaSlack.logger.info "Uploading #{emote[:name]}"
-            file_name = "#{tmp_dir_path}/#{Digest::SHA1.hexdigest(emote[:name])}"
+            file_path = File.join(tmp_dir_path, Digest::SHA1.hexdigest(emote[:name]))
 
-            File.open(file_name, 'w') do |file|
+            File.open(file_path, 'w') do |file|
               http.get_content(emote[:url]) do |chunk|
                 file.write(chunk)
               end
@@ -49,7 +49,7 @@ module KappaSlack
 
             uploaded_page = uploaded_page.form_with(:id => 'addemoji') do |form|
               form.field_with(:name => 'name').value = emote[:name]
-              form.file_upload_with(:name => 'img').file_name = file_name
+              form.file_upload_with(:name => 'img').file_name = file_path
             end.submit
           end
 
