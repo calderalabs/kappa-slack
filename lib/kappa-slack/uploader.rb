@@ -7,50 +7,17 @@ require 'digest/sha1'
 
 module KappaSlack
   class Uploader
-    def initialize(slack_team_name:, slack_email:, slack_password:)
+    def initialize(
+      slack_team_name:,
+      slack_email:,
+      slack_password:,
+      skip_bttv_emotes:,
+      skip_one_letter_emotes:)
       @slack_team_name = slack_team_name
       @slack_email = slack_email
       @slack_password = slack_password
-    end
-
-    def browser
-      @browser ||= Mechanize.new
-    end
-
-    def http
-      @http ||= HTTPClient.new
-    end
-
-    def visit(path, &block)
-      browser.get(URI.join("https://#{slack_team_name}.slack.com", path), &block)
-    end
-
-    def bttv_emotes
-      response = JSON.parse(http.get_content('https://api.betterttv.net/2/emotes'))
-      url_template = "https:#{response['urlTemplate'].gsub('{{image}}', '1x')}"
-
-      response['emotes'].map do |emote|
-        {
-          name: emote['code'].parameterize,
-          url: url_template.gsub('{{id}}', emote['id'])
-        }
-      end
-    end
-
-    def twitch_emotes
-      response = JSON.parse(http.get_content('https://twitchemotes.com/api_cache/v2/global.json'))
-      url_template = response['template']['small']
-
-      response['emotes'].map do |name, emote|
-        {
-          name: name.parameterize,
-          url: url_template.gsub('{image_id}', emote['image_id'].to_s)
-        }
-      end
-    end
-
-    def emotes
-      bttv_emotes + twitch_emotes
+      @skip_bttv_emotes = skip_bttv_emotes
+      @skip_one_letter_emotes = skip_one_letter_emotes
     end
 
     def upload
@@ -94,5 +61,60 @@ module KappaSlack
     private
 
     attr_reader :slack_team_name, :slack_email, :slack_password
+
+    def skip_bttv_emotes?
+      @skip_bttv_emotes
+    end
+
+    def skip_one_letter_emotes?
+      @skip_one_letter_emotes
+    end
+
+    def browser
+      @browser ||= Mechanize.new
+    end
+
+    def http
+      @http ||= HTTPClient.new
+    end
+
+    def visit(path, &block)
+      browser.get(URI.join("https://#{slack_team_name}.slack.com", path), &block)
+    end
+
+    def bttv_emotes
+      response = JSON.parse(http.get_content('https://api.betterttv.net/2/emotes'))
+      url_template = "https:#{response['urlTemplate'].gsub('{{image}}', '1x')}"
+
+      response['emotes'].map do |emote|
+        {
+          name: emote['code'].parameterize,
+          url: url_template.gsub('{{id}}', emote['id'])
+        }
+      end
+    end
+
+    def twitch_emotes
+      response = JSON.parse(http.get_content('https://twitchemotes.com/api_cache/v2/global.json'))
+      url_template = response['template']['small']
+
+      response['emotes'].map do |name, emote|
+        {
+          name: name.parameterize,
+          url: url_template.gsub('{image_id}', emote['image_id'].to_s)
+        }
+      end
+    end
+
+    def emotes
+      all_emotes = twitch_emotes
+      all_emotes += bttv_emotes unless skip_bttv_emotes?
+
+      if skip_one_letter_emotes?
+        all_emotes.select { |e| e[:name].length > 1 }
+      else
+        all_emotes
+      end
+    end
   end
 end

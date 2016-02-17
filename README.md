@@ -28,4 +28,9 @@ Without an `.env` file, you can still run the script, but you need to provide op
 bin/kappa-slack --slack-team-name=kappa --slack-email=kappa@twitch.tv --slack-password=password123
 ```
 
+Optionally, you can pass these options to skip certain emotes:
+
+* `--skip-bttv-emotes` (default: `false`) Skips emotes from BetterTTV
+* `--skip-one-letter-emotes` (default: `true`) Skips single letter emotes, like `D:`
+
 Enjoy!
