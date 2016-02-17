@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+ENV['ENV'] ||= 'development'
+require 'bundler'
+Bundler.setup(:default, ENV['ENV'])
+
+APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/..")
+LIB_PATH = File.join(APP_ROOT, 'lib')
+$LOAD_PATH.unshift(LIB_PATH)
+
+require 'dotenv'
+
+Dotenv.load(
+  File.join(APP_ROOT, ".env.#{ENV['ENV']}"),
+  File.join(APP_ROOT, '.env')
+)
+
+require 'kappa-slack'
+
+KappaSlack::CLI.start(ARGV)
