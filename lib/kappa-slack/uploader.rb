@@ -86,7 +86,7 @@ module KappaSlack
       response = JSON.parse(http.get_content('https://api.betterttv.net/2/emotes'))
       url_template = "https:#{response['urlTemplate'].gsub('{{image}}', '1x')}"
 
-      response['emotes'].map do |emote|
+      response['emotes'].select { |e| e['imageType'] != 'gif' }.map do |emote|
         {
           name: emote['code'].parameterize,
           url: url_template.gsub('{{id}}', emote['id'])
