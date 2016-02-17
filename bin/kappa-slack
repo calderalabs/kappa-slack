@@ -9,12 +9,7 @@ LIB_PATH = File.join(APP_ROOT, 'lib')
 $LOAD_PATH.unshift(LIB_PATH)
 
 require 'dotenv'
-
-Dotenv.load(
-  File.join(APP_ROOT, ".env.#{ENV['ENV']}"),
-  File.join(APP_ROOT, '.env')
-)
+Dotenv.load
 
 require 'kappa-slack'
-
 KappaSlack::CLI.start(ARGV)
