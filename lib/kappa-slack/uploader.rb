@@ -27,8 +27,6 @@ module KappaSlack
           form.password = slack_password
         end.submit
 
-        KappaSlack.logger.info "Logged in as #{slack_email}"
-
         visit('/admin/emoji') do |emoji_page|
           uploaded_page = emoji_page
           tmp_dir_path = File.join(APP_ROOT, 'tmp')
@@ -37,8 +35,6 @@ module KappaSlack
           emotes.each do |emote|
             existing_emote = uploaded_page.search(".emoji_row:contains(':#{emote[:name]}:')")
             next if existing_emote.present?
-
-            KappaSlack.logger.info "Uploading #{emote[:name]}"
             file_path = File.join(tmp_dir_path, Digest::SHA1.hexdigest(emote[:name]))
 
             File.open(file_path, 'w') do |file|
@@ -46,6 +42,9 @@ module KappaSlack
                 file.write(chunk)
               end
             end
+
+            next if File.size(file_path) > 64 * 1024
+            KappaSlack.logger.info "Uploading #{emote[:name]}"
 
             uploaded_page = uploaded_page.form_with(:id => 'addemoji') do |form|
               form.field_with(:name => 'name').value = emote[:name]
@@ -86,7 +85,7 @@ module KappaSlack
       response = JSON.parse(http.get_content('https://api.betterttv.net/2/emotes'))
       url_template = "https:#{response['urlTemplate'].gsub('{{image}}', '1x')}"
 
-      response['emotes'].select { |e| e['imageType'] != 'gif' }.map do |emote|
+      response['emotes'].map do |emote|
         {
           name: emote['code'].parameterize,
           url: url_template.gsub('{{id}}', emote['id'])
