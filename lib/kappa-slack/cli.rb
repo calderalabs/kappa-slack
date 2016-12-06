@@ -7,6 +7,7 @@ module KappaSlack
     class_option :slack_team_name, default: ENV['SLACK_TEAM_NAME'], required: true, type: :string
     class_option :skip_bttv_emotes, type: :boolean, default: false
     class_option :skip_one_letter_emotes, type: :boolean, default: true
+    class_option :user, type: :string, default: ''
 
     def self.banner
       'kappa-slack [options]'
