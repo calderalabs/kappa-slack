@@ -1,5 +1,5 @@
 # Kappa Slack
-Add Kappa to your Slack.
+Add Kappa to your Slack. Kappa Slack is a script that will add all Twitch and BTTV emotes to your Slack workspace.
 
 ## Installation
 
