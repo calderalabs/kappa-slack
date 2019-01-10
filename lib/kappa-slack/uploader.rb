@@ -12,11 +12,13 @@ module KappaSlack
       slack_email:,
       slack_password:,
       skip_bttv_emotes:,
+      user:,
       skip_one_letter_emotes:)
       @slack_team_name = slack_team_name
       @slack_email = slack_email
       @slack_password = slack_password
       @skip_bttv_emotes = skip_bttv_emotes
+      @user = user
       @skip_one_letter_emotes = skip_one_letter_emotes
     end
 
@@ -69,6 +71,10 @@ module KappaSlack
       @skip_one_letter_emotes
     end
 
+    def user
+      @user
+    end
+
     def browser
       @browser ||= Mechanize.new
     end
@@ -105,9 +111,22 @@ module KappaSlack
       end
     end
 
+    def twitch_sub(user)
+      response = JSON.parse(http.get_content('https://twitchemotes.com/api_cache/v2/subscriber.json'))
+      url_template = response['template']['small']
+
+      response['channels'][user]['emotes'].map do |emote|
+        {
+          name: emote['code'].parameterize,
+          url: url_template.gsub('{image_id}', emote['image_id'].to_s)
+        }
+      end
+    end
+
     def emotes
       all_emotes = twitch_emotes
       all_emotes += bttv_emotes unless skip_bttv_emotes?
+      all_emotes += twitch_sub(user) unless user.eql? ""
 
       if skip_one_letter_emotes?
         all_emotes.select { |e| e[:name].length > 1 }
