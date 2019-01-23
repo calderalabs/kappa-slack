@@ -6,7 +6,9 @@ Add Kappa to your Slack. Kappa Slack is a script that will add all Twitch and BT
 Setup your local copy by running:
 
 ```sh
-git clone git@github.com:calderalabs/kappa-slack.git
+#install ruby
+#gem install bundler
+git clone https://github.com/calderalabs/kappa-slack.git
 cd kappa-slack
 bundle install
 ```
